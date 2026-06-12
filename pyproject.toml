@@ -13,7 +13,7 @@ license = { text = "MIT" }
 dependencies = []
 
 [project.optional-dependencies]
-treesitter = ["tree-sitter>=0.21"]
+treesitter = ["tree-sitter>=0.21", "tree-sitter-language-pack>=0.2"]
 networkx = ["networkx>=3.0"]
 dev = ["pytest>=8.0"]
 

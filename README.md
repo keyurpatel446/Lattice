@@ -24,10 +24,26 @@ rationale.
 
 ```bash
 # zero runtime dependencies — the reference path is pure stdlib
-python -m lattice path/to/project -o graph.json
+python -m lattice path/to/project -o graph
+
+# multiple formats + community detection in one pass
+python -m lattice path/to/project -f json html mermaid --communities -o graph
 
 # deterministic single-process mode (handy in CI)
 python -m lattice path/to/project --serial
+```
+
+Outputs (by `-f`): `json` (full graph), `html` (self-contained interactive
+viz — search, filter, community colors, offline), `mermaid` (architecture
+diagram, clustered by community). `--communities` runs Louvain local-move
+clustering and annotates every node.
+
+Multi-language parsing (JS/TS, Go, Rust, Java) activates automatically when the
+tree-sitter extra is installed; without it, the pure-stdlib Python extractor
+still works and other languages are skipped:
+
+```bash
+pip install "lattice[treesitter] @ ."   # optional: tree-sitter-language-pack
 ```
 
 ## Layout

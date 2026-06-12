@@ -169,12 +169,26 @@ corpus.
 
 ---
 
-## 7. Reference path that runs today
+## 7. What runs today
 
-The scaffold ships a working slice end-to-end so the contracts are real, not
-aspirational:
+The contracts are real, not aspirational — a full slice is implemented:
 
-`ingest/discovery.py → extract/extractors/python_ast.py → graph/csr_store.py →
-render/json_writer.py`, wired in `cli/app.py`. Run it with `python -m lattice
-<path>`. Everything else (tree-sitter adapters, more renderers, clustering,
-MCP serve) plugs into the same ports.
+- **Extraction:** `extract/extractors/python_ast.py` (pure stdlib) plus
+  `extract/extractors/treesitter.py` — one config-driven adapter covering
+  JS/TS, Go, Rust, and Java via tree-sitter. The tree-sitter adapter lazily
+  loads its grammars and reports `supports() == False` when the optional extra
+  is absent, so the pipeline degrades gracefully to other extractors.
+- **Clustering:** `graph/community.py` — a single-level Louvain local-move pass
+  over the CSR snapshot. Chosen over naive label propagation, which collapses
+  weakly-connected clusters across a single bridge edge; Louvain maximizes
+  modularity gain and keeps them separate. Deterministic, dependency-free.
+- **Rendering:** three `Renderer` adapters — `render/json_writer.py`,
+  `render/mermaid_writer.py` (clustered `flowchart`, capped by node degree), and
+  `render/html_writer.py` (self-contained offline force-directed canvas viz with
+  search, confidence filter, and community coloring).
+- **Querying:** `query/traversal.py` — BFS shortest path over the CSR arrays.
+
+All wired in `cli/app.py`:
+`python -m lattice <path> -f json html mermaid --communities`. Remaining
+extensions (more languages, a Leiden adapter, a Neo4j `GraphStore`, an MCP
+`serve` adapter) plug into these same ports without touching the pipeline.
